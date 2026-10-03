@@ -1,9 +1,9 @@
-const Database = require('better-sqlite3');
-const fs = require('node:fs');
-const path = require('node:path');
-const folder = path.join(__dirname, 'data');
-fs.mkdirSync(folder, {recursive:true});
-const db = new Database(path.join(folder, 'catalogue.db'));
+const Database=require('better-sqlite3');
+const fs=require('node:fs');
+const path=require('node:path');
+const folder=path.resolve(process.env.DATA_DIR||path.join(__dirname,'data'));
+fs.mkdirSync(folder,{recursive:true});
+const db=new Database(path.join(folder,'catalogue.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 db.exec(`
@@ -23,9 +23,6 @@ CREATE TABLE IF NOT EXISTS products (
 );
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 `);
-const seed = db.prepare('INSERT OR IGNORE INTO collections(id,name) VALUES (?,?)');
-db.transaction(() => {
- seed.run('adult', 'Adult collection');
- seed.run('kid', 'Kid collection');
-})();
-module.exports = db;
+const seed=db.prepare('INSERT OR IGNORE INTO collections(id,name) VALUES (?,?)');
+db.transaction(()=>{seed.run('adult','Adult collection');seed.run('kid','Kid collection');})();
+module.exports=db;
