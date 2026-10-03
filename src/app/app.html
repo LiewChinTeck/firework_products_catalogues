@@ -1,0 +1,4 @@
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header class="site-header"><div class="container header-row"><a routerLink="/" class="brand" aria-label="GlowFest home"><span class="brand-mark" aria-hidden="true">✳</span>GlowFest<span class="brand-dot">.</span></a><nav aria-label="Main navigation"><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Collections</a><a [routerLink]="auth.loggedIn() ? '/admin' : '/login'" routerLinkActive="active">{{ auth.loggedIn() ? 'Dashboard' : 'Admin' }}</a>@if (auth.loggedIn()) {<button class="text-button" type="button" (click)="logout()">Sign out</button>}</nav></div></header>
+<main id="main-content" tabindex="-1"><router-outlet /></main>
+<footer class="site-footer"><div class="container footer-row"><a routerLink="/" class="brand">GlowFest<span class="brand-dot">.</span></a><p>A little spark. A lasting memory.</p><small>&copy; {{ year }} GlowFest</small></div></footer>

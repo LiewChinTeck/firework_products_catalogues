@@ -1,0 +1,12 @@
+{
+  "/api/**": {
+    "target": "http://127.0.0.1:3000",
+    "secure": false,
+    "timeout": 660000,
+    "proxyTimeout": 660000
+  },
+  "/uploads/**": {
+    "target": "http://127.0.0.1:3000",
+    "secure": false
+  }
+}
