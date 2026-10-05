@@ -1,8 +1,7 @@
 <div class="container page">
  <a class="back-link" routerLink="/">&larr; Catalogue</a>
  <div class="section-heading"><h1>Manage products</h1><button class="button" type="button" (click)="export()">Export products.ts</button></div>
- <p class="notice">Changes are saved only in this browser. To update the website for everyone, export products.ts, replace frontend/src/app/data/products.ts, then redeploy. This page does not upload files or require a login.</p>
- @if(store.warning()){<p class="notice" role="status">{{store.warning()}}</p>}
+ <p class="notice">Changes exist only in memory and are lost on refresh or closing this page. Export products.ts, replace frontend/src/app/data/products.ts, then redeploy to publish. No browser storage is used.</p>
  @if(error()){<p class="error feedback" role="alert">{{error()}}</p>}
  @if(message()){<p class="notice success" role="status">{{message()}}</p>}
  <div class="admin-grid">
@@ -15,7 +14,7 @@
    @if(preview()&&!brokenImage()){<img class="preview" [src]="preview()" alt="Product image preview" referrerpolicy="no-referrer" (error)="brokenImage.set(true)">}
    @if(brokenImage()){<small class="error">Image could not be loaded. Check the link and its access permissions.</small>}
    <div class="field"><label for="product-video">YouTube link (optional)</label><input id="product-video" name="youtubeUrl" [(ngModel)]="form.youtubeUrl" placeholder="https://www.youtube.com/watch?v=..."><small>Videos open in the existing player when a customer clicks a product.</small></div>
-   <div class="actions"><button class="button" type="submit">{{editing()===null?'Add product':'Save changes'}}</button><button class="button secondary" type="button" (click)="reset()">{{editing()===null?'Clear':'Cancel edit'}}</button></div>
+   <div class="actions"><button class="button" type="submit">{{editing()===null?'Add to draft':'Update draft'}}</button><button class="button secondary" type="button" (click)="reset()">{{editing()===null?'Clear':'Cancel edit'}}</button></div>
   </form>
   <section class="panel product-list" aria-labelledby="products-heading">
    <h2 id="products-heading">Products ({{store.products().length}})</h2>
