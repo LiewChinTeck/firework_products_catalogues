@@ -1,0 +1,5 @@
+// Drive preview pages are converted to a best-effort public thumbnail URL.
+export function imageUrl(value:string):string{
+ const text=value.trim();if(!text)return '';
+ try{const url=new URL(text);if(url.protocol!=='https:'||url.username||url.password)return '';if(url.hostname!=='drive.google.com')return url.href;const id=url.pathname.match(/^\/file\/d\/([A-Za-z0-9_-]+)(?:\/|$)/)?.[1]??url.searchParams.get('id');if(!id||! /^[A-Za-z0-9_-]+$/.test(id))return '';const thumb=new URL('https://drive.google.com/thumbnail');thumb.searchParams.set('id',id);thumb.searchParams.set('sz','w1000');const key=url.searchParams.get('resourcekey');if(key)thumb.searchParams.set('resourcekey',key);return thumb.href;}catch{return /^(?![\/\\])(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_.-]+\.(?:webp|png|jpe?g|gif|avif|svg)$/i.test(text)?text:'';}
+}

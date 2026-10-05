@@ -1,4 +1,45 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
-<header class="site-header"><div class="container header-row"><a routerLink="/" class="brand" aria-label="GlowFest home"><span class="brand-mark" aria-hidden="true">✳</span>GlowFest<span class="brand-dot">.</span></a><nav aria-label="Main navigation"><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Collections</a><a [routerLink]="auth.loggedIn() ? '/admin' : '/login'" routerLinkActive="active">{{ auth.loggedIn() ? 'Dashboard' : 'Admin' }}</a>@if (auth.loggedIn()) {<button class="text-button" type="button" (click)="logout()">Sign out</button>}</nav></div></header>
+<header class="site-header">
+  <div class="container header-row">
+    <a routerLink="/" class="brand" aria-label="Pakatan MJN home">
+      <img class="brand-logo" src="logo.webp" alt="">
+      Pakatanmjn<span class="brand-dot">.</span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Collections</a>
+    </nav>
+  </div>
+</header>
 <main id="main-content" tabindex="-1"><router-outlet /></main>
-<footer class="site-footer"><div class="container footer-row"><a routerLink="/" class="brand">GlowFest<span class="brand-dot">.</span></a><p>A little spark. A lasting memory.</p><small>&copy; {{ year }} GlowFest</small></div></footer>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <section class="footer-about" aria-labelledby="footer-company">
+      <h2 id="footer-company">Pakatan Majuniaga Sdn. Bhd.</h2>
+      <p>Pakatan MJN · PAKATAN 荷花</p>
+      <p>Fireworks importer and wholesaler serving West Malaysia.</p>
+      <p>The beauty of fireworks, crafted with heart.</p>
+      <a href="https://pakatanmjn.com.my" target="_blank" rel="noopener noreferrer">pakatanmjn.com.my</a>
+    </section>
+    <section aria-labelledby="footer-contact">
+      <h2 id="footer-contact">Contact</h2>
+      <address>
+        Block A, A-8-6, Tingkat 10 Menara Uncang Emas,<br>
+        85, Jln Loke Yew, 55200 Kuala Lumpur.
+      </address>
+      <p><a href="tel:+60162490310">+60 16-249 0310</a></p>
+      <p><a href="mailto:info@pakatanmjn.com.my">info&#64;pakatanmjn.com.my</a></p>
+      <a href="https://wa.me/60162490310" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    </section>
+    <section aria-labelledby="footer-social">
+      <h2 id="footer-social">Follow us</h2>
+      <div class="footer-links">
+        <a href="https://www.facebook.com/pakatanmajuniaga" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a href="https://www.instagram.com/pakatanmajuniagamy" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://www.tiktok.com/@pakatanmajuniagasb" target="_blank" rel="noopener noreferrer">TikTok</a>
+      </div>
+    </section>
+  </div>
+  <div class="container footer-bottom">
+    <small>&copy; {{ year }} Pakatan Majuniaga Sdn. Bhd.</small>
+  </div>
+</footer>

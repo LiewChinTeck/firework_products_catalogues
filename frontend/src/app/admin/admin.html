@@ -1,1 +1,30 @@
-<div class="container page"><div class="section-heading"><div><p class="eyebrow">Your workspace</p><h1>Catalogue overview</h1><p class="intro">Everything you need to keep GlowFest looking its best.</p></div><a routerLink="/" class="button secondary">View catalogue ↗</a></div><p class="notice">Demo workspace. Product changes are stored only in this browser; they are not shared with other visitors.</p>@if (catalogue.warning()) {<p class="error" role="alert">{{ catalogue.warning() }}</p>}<div class="stats"><article class="panel"><span class="muted">Total products</span><strong>{{ catalogue.products().length }}</strong><span class="badge">ALL COLLECTIONS</span></article><article class="panel"><span class="muted">Adult collection</span><strong>{{ adultCount() }}</strong><a routerLink="/category/adult">View collection ↗</a></article><article class="panel"><span class="muted">Kid collection</span><strong>{{ kidCount() }}</strong><a routerLink="/category/kid">View collection ↗</a></article></div><section class="manage-banner"><div><p class="eyebrow">Keep it fresh</p><h2>Your next update starts here.</h2><p>Add new products, update prices, and organise your collections.</p></div><a class="button" routerLink="/admin/manage">Manage products →</a></section></div>
+<div class="container page">
+ <a class="back-link" routerLink="/">&larr; Catalogue</a>
+ <div class="section-heading"><h1>Manage products</h1><button class="button" type="button" (click)="export()">Export products.ts</button></div>
+ <p class="notice">Changes are saved only in this browser. To update the website for everyone, export products.ts, replace frontend/src/app/data/products.ts, then redeploy. This page does not upload files or require a login.</p>
+ @if(store.warning()){<p class="notice" role="status">{{store.warning()}}</p>}
+ @if(error()){<p class="error feedback" role="alert">{{error()}}</p>}
+ @if(message()){<p class="notice success" role="status">{{message()}}</p>}
+ <div class="admin-grid">
+  <form class="panel form-stack" (ngSubmit)="save()">
+   <h2>{{editing()===null?'Add product':'Edit product'}}</h2>
+   <div class="field"><label for="product-name">Product name *</label><input id="product-name" name="name" [(ngModel)]="form.name" required maxlength="200"></div>
+   <div class="field"><label for="product-code">Product code</label><input id="product-code" name="code" [(ngModel)]="form.code" maxlength="80"></div>
+   <div class="field"><label for="product-category">Collection *</label><select id="product-category" name="category" [(ngModel)]="form.category" required>@for(c of categories;track c.id){<option [value]="c.id">{{c.name}}</option>}</select></div>
+   <div class="field"><label for="product-image">Image link (optional)</label><input id="product-image" name="image" type="url" [(ngModel)]="form.image" (ngModelChange)="brokenImage.set(false)" placeholder="https://example.com/image.webp"><small>Use a public HTTPS image URL or Google Drive share link. For Drive, set General access to Anyone with the link (Viewer).</small></div>
+   @if(preview()&&!brokenImage()){<img class="preview" [src]="preview()" alt="Product image preview" referrerpolicy="no-referrer" (error)="brokenImage.set(true)">}
+   @if(brokenImage()){<small class="error">Image could not be loaded. Check the link and its access permissions.</small>}
+   <div class="field"><label for="product-video">YouTube link (optional)</label><input id="product-video" name="youtubeUrl" [(ngModel)]="form.youtubeUrl" placeholder="https://www.youtube.com/watch?v=..."><small>Videos open in the existing player when a customer clicks a product.</small></div>
+   <div class="actions"><button class="button" type="submit">{{editing()===null?'Add product':'Save changes'}}</button><button class="button secondary" type="button" (click)="reset()">{{editing()===null?'Clear':'Cancel edit'}}</button></div>
+  </form>
+  <section class="panel product-list" aria-labelledby="products-heading">
+   <h2 id="products-heading">Products ({{store.products().length}})</h2>
+   <div class="field"><label for="admin-search">Search products</label><input id="admin-search" type="search" [ngModel]="query()" (ngModelChange)="query.set($event)"></div>
+   @for(p of visible();track p.id){
+    <article class="product-row"><h3>{{p.name}}</h3><div class="actions"><button type="button" class="button secondary small" (click)="edit(p)" [attr.aria-label]="'Edit '+p.name">Edit</button><button type="button" class="button secondary small" (click)="pendingDelete.set(p.id)" [attr.aria-label]="'Delete '+p.name">Delete</button></div>
+     @if(pendingDelete()===p.id){<div class="confirmation"><p>Remove this product?</p><div class="actions"><button class="button danger small" type="button" (click)="remove(p.id)">Remove</button><button class="button secondary small" type="button" (click)="pendingDelete.set(null)">Cancel</button></div></div>}
+    </article>
+   }@empty{<p class="muted">No products found.</p>}
+  </section>
+ </div>
+</div>

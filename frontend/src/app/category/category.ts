@@ -3,10 +3,16 @@ import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { categories, Product } from '../data/products';
-import { CatalogueService } from '../services/catalogue.service';
+import {DomSanitizer,SafeResourceUrl} from '@angular/platform-browser';
+import {youtubeId} from '../utils/youtube';
+import {CatalogueService} from '../data/catalogue.service';
+import {imageUrl} from '../utils/image';
 @Component({selector:'app-category',imports:[RouterLink],templateUrl:'./category.html',styleUrl:'./category.css',changeDetection:ChangeDetectionStrategy.OnPush})
 export class Category {
- readonly catalogue = inject(CatalogueService);
+ readonly imageUrl=imageUrl;readonly failedImages=signal<ReadonlySet<string>>(new Set());
+ imageFailed(value:string):void{this.failedImages.update(images=>new Set([...images,value]));}
+ private readonly store=inject(CatalogueService);
+ private readonly sanitizer=inject(DomSanitizer);
  private readonly document = inject(DOCUMENT);
  private readonly route = inject(ActivatedRoute);
  private readonly params = toSignal(this.route.paramMap,{initialValue:this.route.snapshot.paramMap});
@@ -16,44 +22,27 @@ export class Category {
  readonly page = signal(1);
  readonly pageSize = 10;
  readonly selected = signal<Product | null>(null);
- readonly videoError = signal(false);
- readonly playbackBlocked = signal(false);
- readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('playerDialog');
- readonly player = viewChild.required<ElementRef<HTMLVideoElement>>('player');
+ readonly embedUrl=signal<SafeResourceUrl|null>(null);
+ readonly dialog=viewChild.required<ElementRef<HTMLDialogElement>>('playerDialog');
  private restoreScroll: (() => void) | null = null;
  readonly filtered = computed(() => {
   const query = this.query().trim().toLocaleLowerCase();
-  return this.catalogue.products().filter(p => p.category === this.collection()?.id && p.name.toLocaleLowerCase().includes(query)).sort((a,b) => this.sort() === 'name-desc' ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name));
+  return this.store.products().filter(p => p.category === this.collection()?.id && p.name.toLocaleLowerCase().includes(query)).sort((a,b) => this.sort() === 'name-desc' ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name));
  });
  readonly pages = computed(() => Math.max(1,Math.ceil(this.filtered().length / this.pageSize)));
  readonly currentPage = computed(() => Math.min(this.page(),this.pages()));
  readonly visible = computed(() => this.filtered().slice((this.currentPage()-1)*this.pageSize,this.currentPage()*this.pageSize));
- constructor() { inject(DestroyRef).onDestroy(() => { this.player()?.nativeElement.pause(); this.unlockScroll(); }); }
- search(value: string): void { this.query.set(value); this.page.set(1); }
- open(product: Product): void {
-  this.selected.set(product); this.videoError.set(false); this.playbackBlocked.set(false);
-  const video = this.player().nativeElement;
-  video.pause(); video.muted = false;
-  if (product.video) video.src = product.video; else video.removeAttribute('src');
-  video.load(); this.lockScroll(); this.dialog().nativeElement.showModal();
-  if (product.video) this.play();
+ constructor(){inject(DestroyRef).onDestroy(()=>this.unlockScroll());}
+ search(value:string):void{this.query.set(value);this.page.set(1);}
+ open(product:Product):void{
+  this.selected.set(product);
+  const id=youtubeId(product.youtubeUrl);
+  // Only an allowlisted YouTube origin and validated video ID enter this trusted URL.
+  this.embedUrl.set(id?this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&controls=1&rel=0`):null);
+  this.lockScroll();this.dialog().nativeElement.showModal();
  }
- play(): void {
-  const video = this.player().nativeElement; const product = this.selected();
-  this.playbackBlocked.set(false);
-  void video.play().catch((error: unknown) => {
-   if (this.selected() !== product || !this.dialog().nativeElement.open || !(error instanceof DOMException) || error.name !== 'NotAllowedError') return;
-   // Mobile browsers may allow immediate muted playback when sound autoplay is blocked.
-   video.muted = true;
-   void video.play().catch(() => { if (this.selected() === product && this.dialog().nativeElement.open) this.playbackBlocked.set(true); });
-  });
- }
- close(): void { this.player().nativeElement.pause(); this.dialog().nativeElement.close(); this.cleanup(); }
- cleanup(): void {
-  if (this.dialog().nativeElement.open) return;
-  const video = this.player().nativeElement; video.pause(); video.removeAttribute('src'); video.load();
-  this.selected.set(null); this.videoError.set(false); this.playbackBlocked.set(false); this.unlockScroll();
- }
+ close():void{this.dialog().nativeElement.close();this.cleanup();}
+ cleanup():void{if(this.dialog().nativeElement.open)return;this.embedUrl.set(null);this.selected.set(null);this.unlockScroll();}
  private lockScroll(): void {
   if (this.restoreScroll) return;
   const body = this.document.body; const root = this.document.documentElement; const win = this.document.defaultView;
